@@ -1,0 +1,12 @@
+2025-02-23 14:44:32,092 - INFO - Database initialized successfully
+2025-02-23 14:44:32,093 - INFO - Fetching sitemap...
+2025-02-23 14:44:32,983 - INFO - Processing completed
+2025-02-23 14:44:32,983 - ERROR - Fatal error: Couldn't find a tree builder with the features you requested: xml. Do you need to install a parser library?
+2025-02-23 15:03:24,547 - INFO - Database initialized successfully
+2025-02-23 15:03:24,547 - INFO - Fetching sitemap...
+2025-02-23 15:03:30,211 - INFO - Found 0 recipe URLs
+2025-02-23 15:03:30,219 - INFO - Processing completed
+2025-02-23 15:07:31,513 - INFO - Database initialized successfully
+2025-02-23 15:07:31,513 - INFO - Fetching sitemap...
+2025-02-23 15:07:32,553 - INFO - Found 0 recipe URLs
+2025-02-23 15:07:32,568 - INFO - Processing completed
