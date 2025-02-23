@@ -3,38 +3,52 @@ import requests
 import logging
 import hashlib
 import time
+import random
 from datetime import datetime
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 from tqdm import tqdm
+import colorlog
+from requests.adapters import HTTPAdapter
+from urllib.parse import urljoin
 
-# ---------------------------
-# Конфигурация
-# ---------------------------
 class Config:
     DB_NAME = 'recipes.db'
     BASE_URL = 'https://www.russianfood.com'
-    SITEMAP_URL = f'{BASE_URL}/sitemap.xml'
-    REQUEST_DELAY = 1  # Задержка между запросами в секундах
-    TIMEOUT = 10  # Таймаут для HTTP-запросов
+    CATALOG_URL = f'{BASE_URL}/recipes/'
+    TIMEOUT = 10
+    MIN_DELAY = 1
+    MAX_DELAY = 5
     LOG_FILE = 'parser.log'
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    RETRIES = 3
 
-# ---------------------------
-# Настройка логирования
-# ---------------------------
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(Config.LOG_FILE),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+def setup_logging():
+    handler = colorlog.StreamHandler()
+    handler.setFormatter(colorlog.ColoredFormatter(
+        '%(log_color)s%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        log_colors={
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
+        }
+    ))
 
-# ---------------------------
-# Инициализация БД
-# ---------------------------
+    file_handler = logging.FileHandler(Config.LOG_FILE, encoding='utf-8')
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s'
+    ))
+
+    _logger = colorlog.getLogger()
+    _logger.addHandler(handler)
+    _logger.addHandler(file_handler)
+    _logger.setLevel(logging.DEBUG)
+    return _logger
+
+logger = setup_logging()
+
 def init_db():
     conn = sqlite3.connect(Config.DB_NAME)
     cursor = conn.cursor()
@@ -94,27 +108,29 @@ def init_db():
     conn.close()
     logger.info("Database initialized successfully")
 
-# ---------------------------
-# Вспомогательные функции
-# ---------------------------
+def get_retry_session():
+    session = requests.Session()
+    adapter = HTTPAdapter(max_retries=Config.RETRIES)
+    session.mount('https://', adapter)
+    session.mount('http://', adapter)
+    session.trust_env = False  # Игнорировать системные настройки прокси
+    session.proxies = {}  # Явно указываем, что прокси не используется
+
+    return session
+
 def get_or_create(table: str, name: str, cursor: sqlite3.Cursor) -> int:
-    try:
-        cursor.execute(f'SELECT id FROM {table} WHERE name = ?', (name,))
-        result = cursor.fetchone()
-        if result:
-            return result[0]
-        cursor.execute(f'INSERT INTO {table} (name) VALUES (?)', (name,))
-        return cursor.lastrowid
-    except Exception as e:
-        logger.error(f"Error in get_or_create: {str(e)}")
-        raise
+    cursor.execute(f'SELECT id FROM {table} WHERE name = ?', (name,))
+    result = cursor.fetchone()
+    if result:
+        return result[0]
+    cursor.execute(f'INSERT INTO {table} (name) VALUES (?)', (name,))
+    return cursor.lastrowid
 
 def calculate_hash(content: str) -> str:
     return hashlib.sha256(content.encode()).hexdigest()
 
 def parse_quantity(text: str) -> tuple:
     try:
-        # Обработка дробей и сложных форматов
         text = text.replace('½', '0.5').replace('¼', '0.25').replace('¾', '0.75')
         parts = text.split()
         for i, part in enumerate(parts):
@@ -129,200 +145,133 @@ def parse_quantity(text: str) -> tuple:
     except Exception as e:
         logger.warning(f"Error parsing quantity '{text}': {str(e)}")
         return None, text
-
-# ---------------------------
-# Парсер рецептов
-# ---------------------------
 class RecipeParser:
     def __init__(self, cursor: sqlite3.Cursor):
         self.cursor = cursor
+        self.session = get_retry_session()
+
+    def get_recipe_links(self):
+        logger.info("Сбор ссылок на рецепты через каталог")
+        try:
+            response = self.session.get(
+                Config.CATALOG_URL,
+                headers={'User-Agent': Config.USER_AGENT},
+                timeout=Config.TIMEOUT
+            )
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Собираем все категории (пример для "Борщи")
+            categories = soup.select('dl.catalogue dt a.resList[href^="/recipes/bytype/?fid="]')
+
+            recipe_links = []
+            for category in tqdm(categories, desc="Обработка категорий"):
+                try:
+                    category_url = urljoin(Config.BASE_URL, category['href'])
+                    logger.debug(f"Обработка категории: {category_url}")
+
+                    # Пагинация
+                    category_response = self.session.get(category_url)
+                    category_soup = BeautifulSoup(category_response.text, 'html.parser')
+                    pages = category_soup.select('div.pages a:not(.current)')
+                    numeric_pages = [a for a in pages if a.text.strip().isdigit()]
+                    last_page = int(numeric_pages[-1].text) if numeric_pages else 1
+
+                    # Сбор ссылок на рецепты
+                    for page in range(1, last_page + 1):
+                        page_url = f"{category_url}?page={page}"
+                        page_response = self.session.get(page_url)
+                        page_soup = BeautifulSoup(page_response.text, 'html.parser')
+
+                        # Извлечение ссылок на рецепты
+                        links = page_soup.select('div.recipe_title a[href^="/recipes/recipe.php"]')
+                        logger.debug(f"Найдено ссылок: {len(links)}")
+                        if not links:
+                            logger.error(f"Ссылки не найдены!")
+                            continue
+                        for link in links:
+                            recipe_url = urljoin(Config.BASE_URL, link['href'])
+                            recipe_links.append(recipe_url)
+                            logger.debug(f"Найдена ссылка: {recipe_url}")
+
+                        time.sleep(random.uniform(2, 5))  # Увеличьте задержку
+
+                except Exception as e:
+                    logger.error(f"Ошибка обработки {category_url}: {str(e)}")
+                    continue
+
+            return list(set(recipe_links))
+
+        except Exception as e:
+            logger.error(f"Фатальная ошибка: {str(e)}", exc_info=True)
+            return []
 
     def parse_recipe_page(self, url: str):
         try:
-            # Загрузка страницы
-            time.sleep(Config.REQUEST_DELAY)
-            response = requests.get(url, timeout=Config.TIMEOUT)
-            response.raise_for_status()
-
-            # Расчет хеша контента
-            content_hash = calculate_hash(response.text)
-
-            # Проверка на существование
-            self.cursor.execute('''
-                SELECT id, content_hash FROM recipe
-                WHERE url = ?
-            ''', (url,))
-            existing = self.cursor.fetchone()
-
-            if existing:
-                if existing[1] == content_hash:
-                    logger.debug(f"No changes detected: {url}")
-                    return
-                logger.info(f"Updating recipe: {url}")
-
+            response = self.session.get(url)
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            # Извлечение данных
-            recipe_data = self._extract_recipe_data(soup, url, content_hash)
-            ingredients = self._extract_ingredients(soup)
+            # Название рецепта
+            title = soup.find('h1').text.strip()
+
+            # Ингредиенты
+            ingredients = []
+            ingr_block = soup.find('div', class_='ingr')
+            if ingr_block:
+                for li in ingr_block.find_all('li'):
+                    text = li.text.strip()
+                    name_part, quantity_part = text.split(' - ', 1) if ' - ' in text else (text, '')
+                    quantity, unit = parse_quantity(quantity_part)
+                    ingredients.append({
+                        'name': name_part.strip(),
+                        'quantity': quantity,
+                        'unit': unit
+                    })
+
+            # Инструкция
+            instructions = []
+            steps = soup.find('div', class_='steps')
+            if steps:
+                for step in steps.find_all('p'):
+                    instructions.append(step.text.strip())
 
             # Сохранение в БД
-            self._save_recipe(recipe_data, ingredients, existing)
+            self.save_to_db(title, url, ingredients, instructions)
 
         except Exception as e:
-            logger.error(f"Error processing {url}: {str(e)}")
+            logger.error(f"Ошибка парсинга {url}: {str(e)}")
 
-    def _extract_recipe_data(self, soup: BeautifulSoup, url: str, content_hash: str) -> dict:
-        data = {
-            'url': url,
-            'content_hash': content_hash,
-            'last_updated': datetime.now()
-        }
+class CaptchaError(Exception):
+    pass
 
-        # Заголовок
-        title_elem = soup.find('h1', itemprop='name')
-        data['title'] = title_elem.text.strip() if title_elem else ''
-
-        # Характеристики
-        characteristics = {}
-        table = soup.find('div', class_='recipe_about')
-        if table:
-            for row in table.find_all('tr'):
-                key = row.th.text.strip().replace(':', '')
-                value = row.td.text.strip()
-                characteristics[key] = value
-
-        # Парсинг характеристик
-        mapping = {
-            'Категория': ('category', 'category'),
-            'Кухня': ('cuisine', 'cuisine'),
-            'Тип блюда': ('dish_type', 'dish_type'),
-            'Повод': ('purpose', 'purpose')
-        }
-
-        for key, (table_name, field) in mapping.items():
-            if key in characteristics:
-                value = characteristics[key]
-                data[field] = get_or_create(table_name, value, self.cursor)
-            else:
-                data[field] = None
-
-        return data
-
-    def _extract_ingredients(self, soup: BeautifulSoup) -> list:
-        ingredients = []
-        ingr_block = soup.find('div', class_='ingr')
-        if ingr_block:
-            for li in ingr_block.find_all('li'):
-                text = li.text.strip()
-                if ' - ' in text:
-                    name_part, quantity_part = text.split(' - ', 1)
-                else:
-                    name_part, quantity_part = text, ''
-
-                quantity, unit = parse_quantity(quantity_part)
-                ingredients.append({
-                    'name': name_part.strip(),
-                    'quantity': quantity,
-                    'unit': unit
-                })
-        return ingredients
-
-    def _save_recipe(self, recipe_data: dict, ingredients: list, existing: tuple):
-        try:
-            if existing:
-                # Обновление существующего рецепта
-                recipe_id = existing[0]
-                self.cursor.execute('''
-                    UPDATE recipe SET
-                        title = ?,
-                        category_id = ?,
-                        cuisine_id = ?,
-                        dish_type_id = ?,
-                        purpose_id = ?,
-                        content_hash = ?,
-                        last_updated = ?
-                    WHERE id = ?
-                ''', (
-                    recipe_data['title'],
-                    recipe_data['category'],
-                    recipe_data['cuisine'],
-                    recipe_data['dish_type'],
-                    recipe_data['purpose'],
-                    recipe_data['content_hash'],
-                    recipe_data['last_updated'],
-                    recipe_id
-                ))
-            else:
-                # Создание нового рецепта
-                self.cursor.execute('''
-                    INSERT INTO recipe (
-                        title, url, category_id, cuisine_id,
-                        dish_type_id, purpose_id, content_hash, last_updated
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    recipe_data['title'],
-                    recipe_data['url'],
-                    recipe_data['category'],
-                    recipe_data['cuisine'],
-                    recipe_data['dish_type'],
-                    recipe_data['purpose'],
-                    recipe_data['content_hash'],
-                    recipe_data['last_updated']
-                ))
-                recipe_id = self.cursor.lastrowid
-
-            # Сохранение ингредиентов
-            self.cursor.execute('DELETE FROM ingredient WHERE recipe_id = ?', (recipe_id,))
-            for ingr in ingredients:
-                self.cursor.execute('''
-                    INSERT INTO ingredient
-                    (recipe_id, name, quantity, unit)
-                    VALUES (?, ?, ?, ?)
-                ''', (recipe_id, ingr['name'], ingr['quantity'], ingr['unit']))
-
-            logger.info(f"{'Updated' if existing else 'Added'} recipe: {recipe_data['title']}")
-
-        except Exception as e:
-            logger.error(f"Error saving recipe: {str(e)}")
-            raise
-
-# ---------------------------
-# Основная логика
-# ---------------------------
 def main():
     init_db()
     conn = sqlite3.connect(Config.DB_NAME)
     cursor = conn.cursor()
 
     try:
-        # Получение списка URL
-        logger.info("Fetching sitemap...")
-        response = requests.get(Config.SITEMAP_URL, timeout=Config.TIMEOUT)
-        soup = BeautifulSoup(response.content, 'xml')
-        urls = [loc.text for loc in soup.find_all('loc') if 'recipe' in loc.text]
-        logger.info(f"Found {len(urls)} recipe URLs")
-
-        # Инициализация парсера
         parser = RecipeParser(cursor)
+        recipe_urls = parser.get_recipe_links()
 
-        # Обработка рецептов с прогресс-баром
-        for url in tqdm(urls, desc="Processing recipes"):
+        if not recipe_urls:
+            logger.error("Не удалось собрать ссылки на рецепты!")
+            return
+
+        progress_bar = tqdm(recipe_urls, desc="Обработка рецептов", unit="recipe")
+        for url in progress_bar:
             try:
                 parser.parse_recipe_page(url)
                 conn.commit()
             except Exception as e:
-                logger.error(f"Critical error processing {url}: {str(e)}")
+                logger.error(f"Ошибка обработки {url}: {str(e)}")
                 conn.rollback()
+                time.sleep(random.uniform(Config.MIN_DELAY, Config.MAX_DELAY))
 
+        logger.info("Обработка завершена")
+    except Exception as e:
+        logger.error(f"Фатальная ошибка: {str(e)}", exc_info=True)
     finally:
         conn.close()
-        logger.info("Processing completed")
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        logger.info("Process interrupted by user")
-    except Exception as e:
-        logger.error(f"Fatal error: {str(e)}")
+    main()
