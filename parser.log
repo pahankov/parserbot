@@ -1,8 +1,50 @@
-2025-02-24 20:12:02,543 - INFO - === НАЧАЛО ПАРСИНГА ===
-2025-02-24 20:19:30,183 - INFO - Database connection closed
-2025-02-24 20:19:30,183 - INFO - 
-                === ИТОГИ ===
-                Обработано: 832 URL
-                Сохранено рецептов: 0
-                Ошибок: 0
-            
+2025-02-24 23:13:31,235 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-02-24 23:13:35,523 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/range(1, 300)/
+2025-02-24 23:13:35,524 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 0
+            Сохранено рецептов: 0
+            Ошибок: 1
+        
+2025-02-24 23:14:24,423 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-02-24 23:14:29,279 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/109187/ (PovarenokParser._get_image() missing 1 required positional argument: 'soup')
+Traceback (most recent call last):
+  File "C:\PythonProect\Parserfood\parser.py", line 85, in _parse_recipe
+    'image_url': self._get_image(soup),
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: PovarenokParser._get_image() missing 1 required positional argument: 'soup'
+2025-02-24 23:14:29,279 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 1
+            Сохранено рецептов: 0
+            Ошибок: 1
+        
+2025-02-24 23:15:47,175 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-02-24 23:15:52,455 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/109187/ (PovarenokParser._get_image() missing 1 required positional argument: 'soup')
+Traceback (most recent call last):
+  File "C:\PythonProect\Parserfood\parser.py", line 85, in _parse_recipe
+    'image_url': self._get_image(soup),
+                 ^^^^^^^^^^^^^^^^^^^^^
+TypeError: PovarenokParser._get_image() missing 1 required positional argument: 'soup'
+2025-02-24 23:15:52,455 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 1
+            Сохранено рецептов: 0
+            Ошибок: 1
+        
+2025-02-24 23:16:41,654 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-02-24 23:16:44,844 - INFO - Сохранен: Панировка "Пряная"
+2025-02-24 23:16:44,844 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 1
+            Сохранено рецептов: 1
+            Ошибок: 0
+        
+2025-02-24 23:17:18,584 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-02-24 23:17:23,041 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/range(0, -199)/
+2025-02-24 23:17:23,041 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 0
+            Сохранено рецептов: 0
+            Ошибок: 1
+        
