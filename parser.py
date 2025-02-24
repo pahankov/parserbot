@@ -16,8 +16,9 @@ class Config:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
     }
-    DELAY = (2, 5)
-    TEST_IDS = [109187]  # Тестовый ID рабочего рецепта
+    DELAY = (0.1, 0.1)  # Увеличьте задержку при необходимости
+    START_ID = 1     # Начальный ID
+    END_ID = 200     # Конечный ID
 
 
 def setup_logger():
@@ -50,9 +51,14 @@ class PovarenokParser:
 
     def parse_recipes(self):
         logger.info("=== НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===")
-        for recipe_id in tqdm(Config.TEST_IDS, desc="Обход рецептов"):
-            recipe_url = f"{Config.BASE_URL}/recipes/show/{recipe_id}/"
-            self._parse_recipe(recipe_url)
+        total_ids = Config.END_ID - Config.START_ID + 1
+
+        # Прогресс-бар для отслеживания
+        with tqdm(total=total_ids, desc="Обработка рецептов") as pbar:
+            for recipe_id in range(Config.START_ID, Config.END_ID + 1):
+                recipe_url = f"{Config.BASE_URL}/recipes/show/{recipe_id}/"
+                self._parse_recipe(recipe_url)
+                pbar.update(1)
 
     def _parse_recipe(self, url):
         if url in self.processed_urls:
