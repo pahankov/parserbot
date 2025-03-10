@@ -282,3 +282,131 @@ TypeError: PovarenokParser._get_image() missing 1 required positional argument: 
             Сохранено рецептов: 129
             Ошибок: 70
         
+2025-03-10 18:47:50,248 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-03-10 18:47:50,981 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/1/
+2025-03-10 18:47:51,264 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/2/
+2025-03-10 18:47:51,569 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/3/
+2025-03-10 18:47:51,787 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/4/
+2025-03-10 18:47:52,012 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/5/
+2025-03-10 18:47:52,406 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/6/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:52,881 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/7/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:53,318 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/8/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:53,789 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/9/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:54,211 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/10/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:54,615 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/11/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:55,067 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/12/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:55,529 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/13/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:55,966 - ERROR - Ошибка парсинга: https://www.povarenok.ru/recipes/show/14/ (Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?)
+Traceback (most recent call last):
+  File "C:\PythonProject\Parserfood\parser.py", line 78, in _parse_recipe
+    soup = BeautifulSoup(response.text, 'lxml')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\site-packages\bs4\__init__.py", line 243, in __init__
+    raise FeatureNotFound(
+bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+2025-03-10 18:47:56,183 - WARNING - Парсинг прерван пользователем
+2025-03-10 18:47:56,183 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 0
+            Сохранено рецептов: 0
+            Ошибок: 14
+        
+2025-03-10 18:55:18,219 - INFO - === НАЧАЛО ПАРСИНГА РЕЦЕПТОВ ===
+2025-03-10 18:55:18,878 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/1/
+2025-03-10 18:55:19,161 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/2/
+2025-03-10 18:55:19,452 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/3/
+2025-03-10 18:55:19,680 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/4/
+2025-03-10 18:55:19,919 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/5/
+2025-03-10 18:55:20,530 - INFO - Сохранен: Фаршированная щука
+2025-03-10 18:55:21,292 - INFO - Сохранен: Мясо в сухарях
+2025-03-10 18:55:21,856 - INFO - Сохранен: Баклажаны с грибами под сметаной
+2025-03-10 18:55:22,465 - INFO - Сохранен: Бутерброды "Кораблики с икрой"
+2025-03-10 18:55:23,027 - INFO - Сохранен: Винегрет
+2025-03-10 18:55:23,525 - INFO - Сохранен: Мясо в виноградных листьях
+2025-03-10 18:55:24,174 - INFO - Сохранен: Заливное в яйцах
+2025-03-10 18:55:24,751 - INFO - Сохранен: Запеканка с куриной печенью
+2025-03-10 18:55:25,253 - INFO - Сохранен: Запеканка "Курица под шубой"
+2025-03-10 18:55:25,550 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/15/
+2025-03-10 18:55:25,837 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/16/
+2025-03-10 18:55:26,454 - INFO - Сохранен: Квашеная капуста без уксуса
+2025-03-10 18:55:26,731 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/18/
+2025-03-10 18:55:27,247 - INFO - Сохранен: Кексы с изюмом
+2025-03-10 18:55:27,760 - INFO - Сохранен: Коктейль с глазурью
+2025-03-10 18:55:28,364 - INFO - Сохранен: Котлеты куриные
+2025-03-10 18:55:28,875 - INFO - Сохранен: Суфле "Апельсины в снегу"
+2025-03-10 18:55:29,161 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/23/
+2025-03-10 18:55:29,458 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/24/
+2025-03-10 18:55:29,737 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/25/
+2025-03-10 18:55:30,021 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/26/
+2025-03-10 18:55:30,464 - INFO - Сохранен: Свинина с клюквой
+2025-03-10 18:55:31,305 - INFO - Сохранен: Домашние чебуреки
+2025-03-10 18:55:32,047 - INFO - Сохранен: Форель соленая в масле
+2025-03-10 18:55:32,331 - WARNING - Ошибка 404: https://www.povarenok.ru/recipes/show/30/
+2025-03-10 18:55:32,911 - INFO - Сохранен: Грибной пудинг
+2025-03-10 18:55:33,465 - INFO - Сохранен: Торт "Идеал"
+2025-03-10 18:55:34,015 - INFO - Сохранен: Рыба в кляре
+2025-03-10 18:55:34,601 - INFO - Сохранен: Курица в пиве
+2025-03-10 18:55:35,214 - INFO - Сохранен: Курица с лимоном
+2025-03-10 18:55:35,289 - WARNING - Парсинг прерван пользователем
+2025-03-10 18:55:35,290 - INFO - 
+            === ИТОГИ ===
+            Обработано URL: 22
+            Сохранено рецептов: 22
+            Ошибок: 13
+        
